@@ -10,4 +10,4 @@ agent = Agent(
     show_tool_calls=True,
     markdown=True,
 )
-agent.print_response("Whats happening in France today 11 Feb 2025?", stream=True)
+agent.print_response("Whats happening in France?", stream=True)

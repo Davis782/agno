@@ -16,7 +16,8 @@ st.set_page_config(
     page_icon=":orange_heart:",
 )
 st.title("Autonomous RAG")
-st.markdown("##### :orange_heart: built using [phidata](https://github.com/phidatahq/phidata)")
+st.markdown(
+    "##### :orange_heart: built using [phidata](https://github.com/phidatahq/phidata)")
 
 
 def restart_assistant():
@@ -32,7 +33,8 @@ def restart_assistant():
 
 def main() -> None:
     # Get LLM model
-    llm_model = st.sidebar.selectbox("Select LLM", options=["gpt-4-turbo", "gpt-3.5-turbo"])
+    llm_model = st.sidebar.selectbox(
+        "Select LLM", options=["gpt-4-turbo", "gpt-3.5-turbo", "llama3:3b", "llama3:70b"])
     # Set assistant_type in session state
     if "llm_model" not in st.session_state:
         st.session_state["llm_model"] = llm_model
@@ -52,7 +54,8 @@ def main() -> None:
 
     # Create assistant run (i.e. log to database) and save run_id in session state
     try:
-        st.session_state["auto_rag_assistant_run_id"] = auto_rag_assistant.create_run()
+        st.session_state["auto_rag_assistant_run_id"] = auto_rag_assistant.create_run(
+        )
     except Exception:
         st.warning("Could not create assistant, is the database running?")
         return
@@ -64,11 +67,13 @@ def main() -> None:
         st.session_state["messages"] = assistant_chat_history
     else:
         logger.debug("No chat history found")
-        st.session_state["messages"] = [{"role": "assistant", "content": "Upload a doc and ask me questions..."}]
+        st.session_state["messages"] = [
+            {"role": "assistant", "content": "Upload a doc and ask me questions..."}]
 
     # Prompt for user input
     if prompt := st.chat_input():
-        st.session_state["messages"].append({"role": "user", "content": prompt})
+        st.session_state["messages"].append(
+            {"role": "user", "content": prompt})
 
     # Display existing chat messages
     for message in st.session_state["messages"]:
@@ -87,7 +92,8 @@ def main() -> None:
             for delta in auto_rag_assistant.run(question):
                 response += delta  # type: ignore
                 resp_container.markdown(response)
-            st.session_state["messages"].append({"role": "assistant", "content": response})
+            st.session_state["messages"].append(
+                {"role": "assistant", "content": response})
 
     # Load knowledge base
     if auto_rag_assistant.knowledge_base:
@@ -106,7 +112,8 @@ def main() -> None:
                     scraper = WebsiteReader(max_links=2, max_depth=1)
                     web_documents: List[Document] = scraper.read(input_url)
                     if web_documents:
-                        auto_rag_assistant.knowledge_base.load_documents(web_documents, upsert=True)
+                        auto_rag_assistant.knowledge_base.load_documents(
+                            web_documents, upsert=True)
                     else:
                         st.sidebar.error("Could not read website")
                     st.session_state[f"{input_url}_uploaded"] = True
@@ -126,7 +133,8 @@ def main() -> None:
                 reader = PDFReader()
                 auto_rag_documents: List[Document] = reader.read(uploaded_file)
                 if auto_rag_documents:
-                    auto_rag_assistant.knowledge_base.load_documents(auto_rag_documents, upsert=True)
+                    auto_rag_assistant.knowledge_base.load_documents(
+                        auto_rag_documents, upsert=True)
                 else:
                     st.sidebar.error("Could not read PDF")
                 st.session_state[f"{auto_rag_name}_uploaded"] = True
@@ -138,10 +146,13 @@ def main() -> None:
             st.sidebar.success("Knowledge base cleared")
 
     if auto_rag_assistant.storage:
-        auto_rag_assistant_run_ids: List[str] = auto_rag_assistant.storage.get_all_run_ids()
-        new_auto_rag_assistant_run_id = st.sidebar.selectbox("Run ID", options=auto_rag_assistant_run_ids)
+        auto_rag_assistant_run_ids: List[str] = auto_rag_assistant.storage.get_all_run_ids(
+        )
+        new_auto_rag_assistant_run_id = st.sidebar.selectbox(
+            "Run ID", options=auto_rag_assistant_run_ids)
         if st.session_state["auto_rag_assistant_run_id"] != new_auto_rag_assistant_run_id:
-            logger.info(f"---*--- Loading {llm_model} run: {new_auto_rag_assistant_run_id} ---*---")
+            logger.info(
+                f"---*--- Loading {llm_model} run: {new_auto_rag_assistant_run_id} ---*---")
             st.session_state["auto_rag_assistant"] = get_auto_rag_assistant(
                 llm_model=llm_model, run_id=new_auto_rag_assistant_run_id
             )
@@ -151,7 +162,8 @@ def main() -> None:
         restart_assistant()
 
     if "embeddings_model_updated" in st.session_state:
-        st.sidebar.info("Please add documents again as the embeddings model has changed.")
+        st.sidebar.info(
+            "Please add documents again as the embeddings model has changed.")
         st.session_state["embeddings_model_updated"] = False
 
 
